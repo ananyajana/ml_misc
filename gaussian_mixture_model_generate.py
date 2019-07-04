@@ -21,15 +21,18 @@ def gmm_sample(num_samples, mix_coeffs, mean, cov):
                 cov = np.diag(np.array(cov)[i, :]),
                 size = z[i])
         i_start = i_end
+        plt.scatter(samples[:, 0], samples[:, 1])
     return samples
 
 
 
 sample_size = 100
 mix_coeff = [0.25, 0.25, 0.25, 0.25]
-mean = [[-1, 0], [0, 1], [1, 0], [0, -1]]
-cov =  [[1, 0], [0, 1],[1, 0], [0, 1],[1, 0], [0, 1],[1, 0], [0, 1]]
+mean = [[-5, 0], [0, 5], [5, 0], [0, -5]]
 cov =  [[1, 0], [0, 1],[1, 0], [0, 1],[1, 0], [0, 1],[1, 0], [0, 1]]
 samples = gmm_sample(sample_size, mix_coeff, mean, cov)
 print(samples)
+#print(samples[:, 0])
+#print(samples[:, 1])
+plt.scatter(samples[:, 0], samples[:, 1])
 
