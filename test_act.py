@@ -8,20 +8,22 @@ import numpy as np
 import skimage.transform
 from sklearn.datasets import load_sample_image
 from scipy.misc import imsave
-
+from skimage import io
 #image = load_sample_image('flower.jpg')
 #image = Image.open('flower.jpg')
-image = Image.open('krishna.jpg').convert('RGB')
+image = Image.open('cat.jpg').convert('RGB')
 imshow(image)
 
-
+#img = io.imread('12.png')
+#image = Image.fromarray(img.astype('uint8'), 'L').convert('RGB')
 normalize = transforms.Normalize(
         mean=[0.485, 0.456, 0.406],
         std=[0.229, 0.224, 0.225]
 )
 
 preprocess = transforms.Compose([
-    transforms.Resize((224, 224)),
+    #transforms.Resize((224, 224)),
+    #transforms.Resize((512, 512)),
     transforms.ToTensor(),
     normalize
     ])
@@ -33,7 +35,7 @@ tensor = preprocess(image)
 prediction_var = Variable((tensor.unsqueeze(0)).cuda(), requires_grad = True)
 
 model = models.resnet18(pretrained=True)
-
+print(model)
 model.cuda()
 model.eval()
 
@@ -59,6 +61,7 @@ print(topk(pred_probabilities, 1))
 
 def get_CAM(feature_conv, weight_fc, class_idx):
     _, nc, h, w = feature_conv.shape
+    print('feature_conv.shape', feature_conv.shape)
     cam = weight_fc[class_idx].dot(feature_conv.reshape((nc, h*w)))
     cam = cam.reshape(h, w)
     # the following two lines are for normalization
@@ -69,7 +72,8 @@ def get_CAM(feature_conv, weight_fc, class_idx):
 
 weight_softmax_params = list(model._modules.get('fc').parameters())
 weight_softmax = np.squeeze(weight_softmax_params[0].cpu().data.numpy())
-#print('weight_softmax_params :', weight_softmax_params)
+print('weight_softmax_params len :', len(weight_softmax_params))
+print('weight_softmax_params[0] shape :', (weight_softmax_params[0].shape))
 #print('the named_parameters in the model')
 #for name, param in model._modules.get('fc').parameters():
 #print('count of named parameters :', len(list(model.named_parameters())))
@@ -126,15 +130,17 @@ print('overlay.shape :', overlay[0].shape)
 print('overlay type :', type(overlay[0]))
 '''
 #imsave('cam_view.png', overlay)
-imshow(overlay[0], alpha = 0.5, cmap = 'jet')
+#imshow(overlay[0], alpha = 0.5, cmap = 'jet')
 #imshow(overlay[0], alpha = 0.5, cmap = 'viridis')
 #display_transform(image)
 #imshow(image)
 
 imshow(display_transform(image))
-imshow(overlay[0], alpha = 0.5, cmap = 'jet')
+#imshow(overlay[0], alpha = 0.5, cmap = 'jet')
 imshow(skimage.transform.resize(overlay[0], tensor.shape[1:3]), alpha = 0.5, cmap = 'jet')
-
+#imshow(skimage.transform.resize(overlay[0], tensor.shape[1:3]), alpha = 0.5)
+#import matplotlib
+#imsave('new.png', skimage.transform.resize(overlay[0], tensor.shape[1:3]), cmap ='jet')
 #print('pred probabilities are :', pred_probabilities)
 #print('pred probabilities size :', pred_probabilities.size())
 #print('topk of pred probabilities are :', topk(pred_probabilities, 1)[1].int())
